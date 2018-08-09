@@ -173,6 +173,8 @@ apply的实现与call相似
     fn.apply(data, [16]);
     fn.myApply(data, [16]);
 # 模拟实现 bind
+>https://github.com/mqyqingfeng/Blog/issues/12 可细看改文章
+
 bind与call/apply不同， 他是调用的时候执行而不是立即执行， bind返回的是一个新的函数
 
 先看一下最终结果
@@ -184,12 +186,16 @@ bind与call/apply不同， 他是调用的时候执行而不是立即执行， b
     var data = {name: 'a'}
 
     Function.prototype.myBind = function(thisObj) {
-        const that = this;
+        const that = this; 
         const params = [...arguments].slice(1);
-        return function() {
+        let f1 = function() {
             const nowParams = [...arguments];
             return that.apply(thisObj, [...params, ...nowParams])
         }
+        let f2 = function() {};
+        f2.prototype = that.prototype;
+        f1.prototype = new f2();
+        return f1
     }
     const f = fn.myBind(data);
     f(18)  // {name: "a", age: 18}
@@ -243,7 +249,37 @@ bind与call/apply不同， 他是调用的时候执行而不是立即执行， b
     }
     const f = fn.myBind(data);
     f(18)  // {name: "a", age: 18}
+到此， 已经完成了对bind的基本定义。但是bind还有一个特点
+>一个绑定函数也能使用new操作符创建对象：这种行为就像把原函数当成构造器。提供的 this 值被忽略，同时调用时的参数被提供给模拟函数。
 
+也就是说当 bind 返回的函数可以作为构造函数使用， 因此我们需要将返回的函数处理为构造函数。回想一下我们的文章[new操作符](https://github.com/NiuQiaoling/interview/blob/master/js/new.md)
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this; //原函数
+        const params = [...arguments].slice(1);
+        let f1 = function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+        // 将新函数的prototype指向原函数的prototype， 这样实例就可以继承绑定函数的原型
+        f1.prototype = that.prototype;
+        return f1
+    }
+
+但是当我们要修改f1.prototype的时候， 绑定函数的prototype也会跟着修改
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this; //原函数
+        const params = [...arguments].slice(1);
+        let f1 = function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+        let f2 = function() {};// 可以通过一个空函数来中转
+        f2.prototype = that.prototype;
+        f1.prototype = new f2();
+        return f1
+    }
 
 
 
