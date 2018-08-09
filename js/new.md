@@ -81,7 +81,7 @@
         this.comment = '哈哈';
     }
     const comment1 = Comment();
-如果创建的实例的时候缺省了new关键字， 则构造函数相当于普通的函数调用；这时， 函数内部的this指代全局变量window， 但是如果在严格模式下， 默认是undefined, 此时给undefined添加属性就会报错
+如果创建的实例的时候缺省了new关键字， 则构造函数相当于普通的函数调用；这时， 函数内部的this指代全局变量window，但是如果在严格模式下， 默认是undefined, 此时给undefined添加属性就会报错
 
 
 
