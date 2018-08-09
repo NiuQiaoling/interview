@@ -14,7 +14,7 @@ bind方法虽然与call,apply的用法有点不同，但是其作用也是一样
     4. 如果第一个参数是 空(不传)/null/undefined, 则默认传入 window 
     5. 如果第一个参数是一个原始值(number/boolean/string)，那么这个原始值会自动转成对应的包装对象，然后传入call/apply方法。
 
-# call 和 apply 的异同点
+# call 和 apply 的异同点
 
 ## call()
 ----
