@@ -127,33 +127,126 @@ apply(thisArg, [arg1, arg2]);
 # 模拟实现 call
 
     Function.prototype.selfCall = function(thisArg) {
-    // 不传第一个参数， 或者第一个参数是null, undefined, 当前this指向window
-    let currentObj = thisArg || window;
-    
-    // 将调用selfCall方法的函数赋值给当前对象的属性上
-    currentObj.fn = this; 
-    
-    // 获取参数，由于第一个参数是重定义的this指向, 所以除去第一个参数， 剩余的参数才是原函数需要的参数
-    let args = [...arguments].slice(1); 
-    
-    // 调用函数传入参数, 所以函数是在call内部被调用的， 调用结果也在call中最终返回
-    let result = currentObj.fn(...args);
-    delete currentObj.fn;
-    
-    return result;
+        /*
+            确定this指向
+            不传第一个参数， 或者第一个参数是null, undefined, 当前this指向window
+        */ 
+        let currentObj = thisArg || window;
+
+        /*
+            获取参数，由于第一个参数是重定义的this指向, 所以除去第一个参数， 剩余的参数才是原函数需要的参数
+        *／
+        let args = [...arguments].slice(1); 
+        
+        // 将调用selfCall方法的函数赋值给当前对象的属性上， 这样调用函数时，函数的上下文即是新的this指向
+        currentObj.fn = this; 
+        
+        // 调用函数传入参数, 所以函数是在call内部被调用的， 调用结果也在call中最终返回
+        let result = currentObj.fn(...args);
+        delete currentObj.fn;
+        
+        return result;
     } 
 
     function fn(a, b) {
-    console.log(22, this);
-    return a + b;
+        console.log(22, this);
+        return a + b;
     }
     var obj = {
-    name: 'a',
+        name: 'a',
     }
-    const res =  fn.selfCall(obj, 1, 2);
-    console.log(22222, res);
+    fn.selfCall(obj, 1, 2);
 # 模拟实现 apply
+apply的实现与call相似
+
+    function fn(age) {
+        this.age = age;
+        console.log(1, this, this.name)
+    }
+    var data = {name: 'a'};
+    Function.prototype.myApply = function(obj) {
+        let currentObj = obj || window;
+        let params = arguments[1] ? arguments[1] : [];
+        currentObj.fn = this; 
+        const result = currentObj.fn(...params); 
+        delete currentObj.fn;
+        return result
+    }
+    fn.apply(data, [16]);
+    fn.myApply(data, [16]);
 # 模拟实现 bind
+bind与call/apply不同， 他是调用的时候执行而不是立即执行， bind返回的是一个新的函数
+
+先看一下最终结果
+
+    function fn(age) {
+        this.age = age;
+        console.log(1, this)
+    }
+    var data = {name: 'a'}
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        const params = [...arguments].slice(1);
+        return function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+    }
+    const f = fn.myBind(data);
+    f(18)  // {name: "a", age: 18}
+
+我们再来看一下实现的过程：
+
+首先，bind既然也能改变this的指向， 我们可以直接用call/apply实现，
+
+    function fn(age) {
+        this.age = age;
+        console.log(1, this)
+    }
+    var data = {name: 'a'}
+  
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        return function() {
+            return that.apply(thisObj)
+        }
+    }
+    fn.myBind(data)() //{name: "a", age: undefined}
+
+由于bind接受第二个参数， 所以需要考虑传參的情况
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        const params = [...arguments].slice(1);
+        return function() {                 // 返回的函数等价于fn.myBind(data, 18)
+            return that.apply(thisObj, params) 
+        }
+    }
+    fn.myBind(data, 18)() // {name: "a", age: 18}
+
+由于bind返回的是一个函数， 在需要的时候再调用， 可以是下列的写法
+
+    const f = fn.myBind(data, 18);
+    f();
+所以， 参数也可以在调用的时候传入， 如下
+
+    const f = fn.myBind(data);
+    f(18);
+因此需要修改自定义的bind函数
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        const params = [...arguments].slice(1);
+        return function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+    }
+    const f = fn.myBind(data);
+    f(18)  // {name: "a", age: 18}
+
+
 
 
     
