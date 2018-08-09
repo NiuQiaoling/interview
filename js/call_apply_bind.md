@@ -9,7 +9,7 @@ bind方法虽然与call,apply的用法有点不同，但是其作用也是一样
 # call 和 apply 的相同点
 
     1. 都是Function.prototype上的方法
-    2. 都是为了改变函数体内部this的指向
+    2. 都是为了改变函数体内部this的指向
     3. 都接收两个参数， 第一个参数是函数运行时的 this 指向的对象
     4. 如果第一个参数是 空(不传)/null/undefined, 则默认传入 window 
     5. 如果第一个参数是一个原始值(number/boolean/string)，那么这个原始值会自动转成对应的包装对象，然后传入call/apply方法。
@@ -41,7 +41,7 @@ call(thisArg, arg1, arg2);
     
      
 ### 应用案例
-调用对象的原生方法
+调用对象的原生方法
 
     Object.prototype.toString.call('8ik')
 
@@ -65,7 +65,7 @@ apply(thisArg, [arg1, arg2]);
     }
     fn.apply(obj); // {name: "a"}
     即函数fn运行时， 函数内部的this指代的是obj, 而不再是正常运行时指代的window
-### 应用案例
+### 应用案例
 - **数组求最值**
 
         由于apply的特性， 我们可以直接对一个数组求最值
@@ -119,7 +119,7 @@ apply(thisArg, [arg1, arg2]);
     fn.bind({name: 'b'}, 3)(); // 3 "b"
 
 # call/apply 和 bind 的相/异同点
-- 三者都可以改变函数内this的指向， 可以接收多个参数， 第一个参数都是this的指向
+- 三者都可以改变函数内this的指向，可以接收多个参数， 第一个参数都是this的指向
 - bind()方法会创建一个新的函数， 只有在需要的时候再调用， 而call/apply会立即执行该函数
 - 第二个参数传入方式不同
 
@@ -229,7 +229,7 @@ bind与call/apply不同， 他是调用的时候执行而不是立即执行， b
 
     const f = fn.myBind(data, 18);
     f();
-所以， 参数也可以在调用的时候传入， 如下
+所以， 参数也可以在调用的时候传入， 如下
 
     const f = fn.myBind(data);
     f(18);
