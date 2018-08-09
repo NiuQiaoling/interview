@@ -40,7 +40,7 @@ call(thisArg, arg1, arg2);
     即函数fn运行时， 函数内部的this指代的是obj, 而不再是正常运行时指代的window
     
      
-### 应用案例
+### 应用案例
 调用对象的原生方法
 
     Object.prototype.toString.call('8ik')
