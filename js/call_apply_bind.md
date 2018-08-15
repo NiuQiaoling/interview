@@ -9,15 +9,14 @@ bind方法虽然与call,apply的用法有点不同，但是其作用也是一样
 # call 和 apply 的相同点
 
     1. 都是Function.prototype上的方法
-    2. 都是为了改变函数体内部this的指向
+    2. 都是为了改变函数体内部this的指向
     3. 都接收两个参数， 第一个参数是函数运行时的 this 指向的对象
     4. 如果第一个参数是 空(不传)/null/undefined, 则默认传入 window 
     5. 如果第一个参数是一个原始值(number/boolean/string)，那么这个原始值会自动转成对应的包装对象，然后传入call/apply方法。
 
-# call 和 apply 的异同点
+# call 和 apply 的异同点
 
 ## call()
-----
 
 call 方法接收两个参数， 第一个参数是函数运行时指定的this值， 第二个参数是一个参数列表。
 
@@ -40,14 +39,13 @@ call(thisArg, arg1, arg2);
     即函数fn运行时， 函数内部的this指代的是obj, 而不再是正常运行时指代的window
     
      
-### 应用案例
-调用对象的原生方法
+### 应用案例
+调用对象的原生方法
 
     Object.prototype.toString.call('8ik')
 
 
 ## apply()
-----
 
 apply 方法接收两个参数， 第一个参数是函数运行时指定的this值， 第二个参数是一个数组。
 
@@ -65,7 +63,7 @@ apply(thisArg, [arg1, arg2]);
     }
     fn.apply(obj); // {name: "a"}
     即函数fn运行时， 函数内部的this指代的是obj, 而不再是正常运行时指代的window
-### 应用案例
+### 应用案例
 - **数组求最值**
 
         由于apply的特性， 我们可以直接对一个数组求最值
@@ -119,7 +117,7 @@ apply(thisArg, [arg1, arg2]);
     fn.bind({name: 'b'}, 3)(); // 3 "b"
 
 # call/apply 和 bind 的相/异同点
-- 三者都可以改变函数内this的指向， 可以接收多个参数， 第一个参数都是this的指向
+- 三者都可以改变函数内this的指向，可以接收多个参数， 第一个参数都是this的指向
 - bind()方法会创建一个新的函数， 只有在需要的时候再调用， 而call/apply会立即执行该函数
 - 第二个参数传入方式不同
 
@@ -127,6 +125,7 @@ apply(thisArg, [arg1, arg2]);
 # 模拟实现 call
 
     Function.prototype.selfCall = function(thisArg) {
+<<<<<<< HEAD
         // 不传第一个参数， 或者第一个参数是null, undefined, 当前this指向window
         let currentObj = thisArg || window;
         
@@ -136,6 +135,22 @@ apply(thisArg, [arg1, arg2]);
         // 获取参数，由于第一个参数是重定义的this指向, 所以除去第一个参数， 剩余的参数才是原函数需要的参数
         let args = [...arguments].slice(1); 
         
+=======
+        /*
+            确定this指向
+            不传第一个参数， 或者第一个参数是null, undefined, 当前this指向window
+        */ 
+        let currentObj = thisArg || window;
+
+        /*
+            获取参数，由于第一个参数是重定义的this指向, 所以除去第一个参数， 剩余的参数才是原函数需要的参数
+        *／
+        let args = [...arguments].slice(1); 
+        
+        // 将调用selfCall方法的函数赋值给当前对象的属性上， 这样调用函数时，函数的上下文即是新的this指向
+        currentObj.fn = this; 
+        
+>>>>>>> 978c63786cc5b3d3da73b6c7177c50cec4ddada5
         // 调用函数传入参数, 所以函数是在call内部被调用的， 调用结果也在call中最终返回
         let result = currentObj.fn(...args);
         delete currentObj.fn;
@@ -150,9 +165,138 @@ apply(thisArg, [arg1, arg2]);
     var obj = {
         name: 'a',
     }
+<<<<<<< HEAD
     const res =  fn.selfCall(obj, 1, 2);
+=======
+    fn.selfCall(obj, 1, 2);
+>>>>>>> 978c63786cc5b3d3da73b6c7177c50cec4ddada5
 # 模拟实现 apply
+apply的实现与call相似
+
+    function fn(age) {
+        this.age = age;
+        console.log(1, this, this.name)
+    }
+    var data = {name: 'a'};
+    Function.prototype.myApply = function(obj) {
+        let currentObj = obj || window;
+        let params = arguments[1] ? arguments[1] : [];
+        currentObj.fn = this; 
+        const result = currentObj.fn(...params); 
+        delete currentObj.fn;
+        return result
+    }
+    fn.apply(data, [16]);
+    fn.myApply(data, [16]);
 # 模拟实现 bind
+>https://github.com/mqyqingfeng/Blog/issues/12 可细看改文章
+
+bind与call/apply不同， 他是调用的时候执行而不是立即执行， bind返回的是一个新的函数
+
+先看一下最终结果
+
+    function fn(age) {
+        this.age = age;
+        console.log(1, this)
+    }
+    var data = {name: 'a'}
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this; 
+        const params = [...arguments].slice(1);
+        let f1 = function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+        let f2 = function() {};
+        f2.prototype = that.prototype;
+        f1.prototype = new f2();
+        return f1
+    }
+    const f = fn.myBind(data);
+    f(18)  // {name: "a", age: 18}
+
+我们再来看一下实现的过程：
+
+首先，bind既然也能改变this的指向， 我们可以直接用call/apply实现，
+
+    function fn(age) {
+        this.age = age;
+        console.log(1, this)
+    }
+    var data = {name: 'a'}
+  
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        return function() {
+            return that.apply(thisObj)
+        }
+    }
+    fn.myBind(data)() //{name: "a", age: undefined}
+
+由于bind接受第二个参数， 所以需要考虑传參的情况
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        const params = [...arguments].slice(1);
+        return function() {                 // 返回的函数等价于fn.myBind(data, 18)
+            return that.apply(thisObj, params) 
+        }
+    }
+    fn.myBind(data, 18)() // {name: "a", age: 18}
+
+由于bind返回的是一个函数， 在需要的时候再调用， 可以是下列的写法
+
+    const f = fn.myBind(data, 18);
+    f();
+所以， 参数也可以在调用的时候传入， 如下
+
+    const f = fn.myBind(data);
+    f(18);
+因此需要修改自定义的bind函数
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this;
+        const params = [...arguments].slice(1);
+        return function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+    }
+    const f = fn.myBind(data);
+    f(18)  // {name: "a", age: 18}
+到此， 已经完成了对bind的基本定义。但是bind还有一个特点
+>一个绑定函数也能使用new操作符创建对象：这种行为就像把原函数当成构造器。提供的 this 值被忽略，同时调用时的参数被提供给模拟函数。
+
+也就是说当 bind 返回的函数可以作为构造函数使用， 因此我们需要将返回的函数处理为构造函数。回想一下我们的文章[new操作符](https://github.com/NiuQiaoling/interview/blob/master/js/new.md)
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this; //原函数
+        const params = [...arguments].slice(1);
+        let f1 = function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+        // 将新函数的prototype指向原函数的prototype， 这样实例就可以继承绑定函数的原型
+        f1.prototype = that.prototype;
+        return f1
+    }
+
+但是当我们要修改f1.prototype的时候， 绑定函数的prototype也会跟着修改
+
+    Function.prototype.myBind = function(thisObj) {
+        const that = this; //原函数
+        const params = [...arguments].slice(1);
+        let f1 = function() {
+            const nowParams = [...arguments];
+            return that.apply(thisObj, [...params, ...nowParams])
+        }
+        let f2 = function() {};// 可以通过一个空函数来中转
+        f2.prototype = that.prototype;
+        f1.prototype = new f2();
+        return f1
+    }
+
 
 
     

@@ -1,14 +1,48 @@
 ## new命令的原理
-----
-使用**new**命令时， 他后面的函数会一次执行下面的步骤：
+使用**new**命令var o = new Foo();时， 他后面的函数会一次执行下面的步骤：
 1. **创建一个空对象， 作为将要返回的对象实例**
+
+    var o = new Object();
 2. **将这个空对象的原型， 指向构造函数的prototype属性**
-3. **将这个空对象赋值给函数内部的this**
+
+    o.__proto__ = Foo.prototype;
+
+3. **将这个空对象赋值给函数内部的this，即修改函数内部this指向**
+
+    Foo.call(o);
 4. **开始执行函数内部的代码**
-5. **返回对象地址**
+
+5. **有返回值时的操作**
+
+    - 如果return语句返回的是this, 则生成的实例就是内部创建的对象， 与不用return语句返回相同；
+
+    - 如果return语句返回的是不相关的对象， 则生成的实例就是这个不相关对象；
+
+    - 如果return语句返回的不是对象， 则默认忽略return语句， 返回创建的对象
+
+            
+## 模拟实现new
+
+    依据上面new命令的原理， 我们来模拟实现一下new
+
+    function selfNew(fn) {
+        var obj = {}; // 创建空对象
+        obj.__proto__ = fn.prototype; // 2. 修改原型指向
+        var res = fn.apply(obj, [...arguments].slice(1)); // 3和4.改变this指向并执行
+        return typeof res === 'object' ? res : obj; // 5.构造函数有返回值的时候的操作
+    }
+    function Fn(name) {
+        this.name = name;
+        return 3
+    }
+    Fn.prototype.say = function() {
+        console.log('hello')
+    }
+
+    var f2 = selfNew(Fn, 'f2');
+    console.log(f2)
 
 ## new.target
-----
 函数内部可以使用new.target属性。如果当前函数是new命令调用，new.target指向当前函数，否则为undefined。
 
     function f() {
@@ -30,7 +64,6 @@
 上面代码中，构造函数f调用时，没有使用new命令，就抛出一个错误。
 
 ## new命令的基本使用
-----
 **new**命令的作用是执行构造函数， 返回一个对象实例
 
     function Comment() {
@@ -84,7 +117,7 @@
         this.comment = '哈哈';
     }
     const comment1 = Comment();
-如果创建的实例的时候缺省了new关键字， 则构造函数相当于普通的函数调用；这时， 函数内部的this指代全局变量window， 但是如果在严格模式下， 默认是undefined, 此时给undefined添加属性就会报错
+如果创建的实例的时候缺省了new关键字， 则构造函数相当于普通的函数调用；这时， 函数内部的this指代全局变量window，但是如果在严格模式下， 默认是undefined, 此时给undefined添加属性就会报错
 
 
 
