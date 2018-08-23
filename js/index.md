@@ -29,3 +29,5 @@
     - [模块化-CommonJS](./模块化_CommonJS.md)
     - [模块化-AMD](./模块化_AMD.md)
     - [模块化-CMD](./模块化_CMD.md)
+    - [模块化-ES6-Module](./模块化_ES6_Module.md)
+    - [模块化-差异](./模块化_差异.md)
