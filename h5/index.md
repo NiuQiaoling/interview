@@ -1,4 +1,4 @@
-### html页面包含meta标签
+### h5页面包含meta标签
 
     - 基本meta
 
@@ -6,6 +6,8 @@
             <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width"/>
             <!--iOS中禁止将数字识别为电话号码-->
             <meta name="format-detection" content="telephone=no"/>
+
+    
     - 搜索引擎meta
 
             搜索引擎索引方式：通常有如下几种取值：none，noindex，nofollow，all，index和follow。
