@@ -1,0 +1,8 @@
+onEndReached：在Android环境下是当滑动到距离底部（xx）距离时触发的，xx就是onEndReachedThreshold：x的设定值。已经滑动到底部后已经不满足距离底部xx的条件，不会再次触发onEndReached（）事件的。
+
+因为苹果的可滑动组件可以拉到底部之后让组件距离底部再拉伸一段距离，因此在苹果上可以将xx设置为负数，实现滑动到底部后上拉仍然触发onEndReached（）；
+
+但是安卓上可滑动组件上拉倒底部之后不能再拉动，因此滑动到底部后再次上拉不会触发onEndReached()。
+
+android上可以设置onEndReachedThreshold为1,即滑动到底部时触发onEndReached
+iOS可以设置onEndReachedThreshold为负值,即滑动到底部上拉时也可触发onEndReached
